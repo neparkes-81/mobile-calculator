@@ -19,10 +19,11 @@ class MainApp(App):
         main_layout.add_widget(self.solution)
         # set up buttons and in their intended order
         buttons = [
-            ["7", "8", "9", "/"],
-            ["4", "5", "6", "*"],
-            ["1", "2", "3", "+"],
-            ["C", "0", ".", "-"]
+            ["7", "8", "9", "del"],
+            ["4", "5", "6", "/"],
+            ["1", "2", "3", "*"],
+            ["C", "0", ".", "+"],
+            ["=", "-"]
         ]
 
         # loop through button rows and define each value as an actual button with function
@@ -33,16 +34,16 @@ class MainApp(App):
                     text = label, font_size=30, background_color="grey",
                     pos_hint={"center_x": 0.5, "center_y": 0.5}
                 )
-                button.bind(on_press = self.on_button_press)
+                if label == "=":
+                    button.size_hint = (3, 1)
+                    button.bind(on_press = self.on_find_solution)
+                elif label == "del":
+                    button.bind(on_press = self.on_delete)
+
+                else:
+                    button.bind(on_press = self.on_button_press)
                 h_layout.add_widget(button)
             main_layout.add_widget(h_layout)
-
-        equal_button = Button(
-            text = "=", font_size=30, background_color="grey",
-            pos_hint={"center_x": 0.5, "center_y": 0.5}
-        )
-        equal_button.bind(on_press = self.on_find_solution)
-        main_layout.add_widget(equal_button)
 
         return main_layout
 
@@ -76,6 +77,11 @@ class MainApp(App):
         if text:
             solution = str(eval(self.solution.text))
             self.solution.text = solution
+
+    def on_delete(self, instance):
+        text = self.solution.text
+        if text:
+            self.solution.text = self.solution.text[:-1]
 
 
 if __name__ == "__main__":
