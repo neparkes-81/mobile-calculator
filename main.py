@@ -6,21 +6,26 @@ from kivy.uix.button import Button
 class MainApp(App):
     def build(self):
         self.icon = "calculator.png"
-        self.operaters = ["/", "*", "+", "-"]
-        self.last_was_operator = None
+        self.operators = ["/", "*", "+", "-"]
+        self.ended_on_operator = None
         self.last_button = None
 
         main_layout = BoxLayout(orientation = "vertical")
-        self.solution = TextInput(background_color = "black", foreground_color = "white")
+        self.solution = TextInput(
+            background_color = "black", foreground_color = "white",
+            multiline = False, halign = "right", font_size = 55, readonly = True
+        )
 
-        main_layout.add_widget(self.solutoin)
+        main_layout.add_widget(self.solution)
+        # set up buttons and in their intended order
         buttons = [
-            ["7", "8", "9", "/"]
-            ["4", "5", "6", "*"]
-            ["1", "2", "3", "+"]
+            ["7", "8", "9", "/"],
+            ["4", "5", "6", "*"],
+            ["1", "2", "3", "+"],
             ["C", "0", ".", "-"]
         ]
 
+        # loop through button rows and define each value as an actual button with function
         for row in buttons:
             h_layout = BoxLayout()
             for label in row:
@@ -36,10 +41,41 @@ class MainApp(App):
             text = "=", font_size=30, background_color="grey",
             pos_hint={"center_x": 0.5, "center_y": 0.5}
         )
-        equal_button.bind(on_press = self.on_button_press)
+        equal_button.bind(on_press = self.on_find_solution)
         main_layout.add_widget(equal_button)
 
         return main_layout
+
+    # provides funtionality for when a button is pressed and how it should be added to the input box
+    def on_button_press(self, instance):
+        current = self.solution.text
+        button_text = instance.text
+
+        if button_text == "C":
+            self.solution.text = ""
+        else:
+            # check is last input was an operator so two can not be put back to back
+            if current and (
+                self.ended_on_operator and button_text in self.operators
+            ):
+                return None
+            # check if first input is an operator 
+            elif current == "" and button_text in self.operators:
+                return None
+            
+            else:
+                new_text = current + button_text
+                self.solution.text = new_text
+        
+        self.last_button = button_text
+        self.ended_on_operator = self.last_button in self.operators
+
+    # when func is called the expression in self.solution is evaluated and replaced with result
+    def on_find_solution(self, instance):
+        text = self.solution.text
+        if text:
+            solution = str(eval(self.solution.text))
+            self.solution.text = solution
 
 
 if __name__ == "__main__":
